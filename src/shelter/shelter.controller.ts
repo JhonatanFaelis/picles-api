@@ -18,7 +18,7 @@ export class ShelterController {
 
     @Patch()
     async updateShelterDetails(@Body() input: UpdateShelterControllerInput) {
-        console.log(input)
+        console.table(input)
     }
 
 }

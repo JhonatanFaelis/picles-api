@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { ShelterModule } from './shelter/shelter.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { PetModule } from './pet/pet.module';
 
 @Module({
   imports: [
@@ -15,7 +16,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       useFactory: async(config:ConfigService) =>({
         uri: config.get<string>('DB_COLECTION_STRING'),
       })
-    })
+    }),
+    PetModule
   ],
   controllers: [AppController],
   providers: [AppService],

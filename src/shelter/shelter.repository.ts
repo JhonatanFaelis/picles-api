@@ -18,4 +18,11 @@ export class ShelterRepository implements IShelterRepository {
     async getAll() : Promise<Shelter []>{
         return await this.sherterModel.find()
     }
+
+    async updated(data: Partial<Shelter>) : Promise<void>{
+        await this.sherterModel.updateOne(null,{
+            ...data,
+            updatedAt : new Date()
+        })
+    }
 }

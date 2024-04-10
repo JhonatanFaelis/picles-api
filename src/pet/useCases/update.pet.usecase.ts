@@ -18,8 +18,13 @@ export default class UpdatePetUseCase implements IUseCase<UpdatePetUseCaseInput,
 
     async run(input: UpdatePetUseCaseInput): Promise<UpdatePetUseCaseOutput> {
         let pet = await this.getPetById(input.id)
-        if(!pet)
+        if (!pet)
             throw new PetNotFoundError();
+
+        await this.petRepository.update({
+            ...input,
+            _id: input.id
+        })
 
         pet = await this.getPetById(input.id)
 

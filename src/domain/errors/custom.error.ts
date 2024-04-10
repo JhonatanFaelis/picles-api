@@ -5,5 +5,8 @@ export abstract class CustomError{
     constructor(message : string, code : string){
         this.message = message;
         this.code = code
+        throw new Error(JSON.stringify(this))
     }
+
+
 }

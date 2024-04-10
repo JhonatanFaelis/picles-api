@@ -21,7 +21,7 @@ export default class GetPetByIdUseCase implements IUseCase<GetPetByIdUseCaseInpu
     async run(input: GetPetByIdUseCaseInput): Promise<GetPetByIdUseCaseOutput> {
         const petById = await this.getPetById(input.id)
 
-        if (!!petById)
+        if (!petById)
             throw new PetNotFoundError();
 
         return new GetPetByIdUseCaseOutput({

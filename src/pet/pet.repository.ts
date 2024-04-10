@@ -6,7 +6,7 @@ import { Injectable } from "@nestjs/common";
 
 
 @Injectable()
-export default class PetRepository implements IPetRepository {
+export default class petRepository implements IPetRepository {
 
 
     constructor(
@@ -15,8 +15,22 @@ export default class PetRepository implements IPetRepository {
     ) { }
 
 
+    async update(data: Partial<Pet>): Promise<void> {
+        await this.petModel.updateOne(
+            {
+                _id: data._id,
+            },
+            {
+                ...data,
+                updateddAt: new Date()
+            }
+
+        )
+    }
+
+
     async getById(id: string): Promise<Pet> {
-        return await this.petModel.findById({_id: id})
+        return await this.petModel.findById({ _id: id })
     }
 
     async create(data: Partial<Pet>): Promise<Pet> {

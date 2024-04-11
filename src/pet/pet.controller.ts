@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Inject, Param, Patch, Post, Put } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Inject, Param, Patch, Post, Put } from '@nestjs/common';
 import CreatePetControllerInput from './dtos/create.pet.controller.input';
 import { IUseCase } from 'src/domain/iusecase.interface';
 import CreatePetUseCaseOutput from './useCases/dtos/create.pet.usecase.output';
@@ -9,6 +9,8 @@ import GetPetByIdUseCaseOutput from './useCases/dtos/get.pet.by.id.usecase.outpu
 import UpdatePetControllerInput from './dtos/update.pet.controller.input';
 import UpdatePetUseCaseOutput from './useCases/dtos/uptade.pet.usecase.output';
 import UpdatePetUseCaseInput from './useCases/dtos/update.pet.usecase.input';
+import DeletePetUseCaseOutPut from './useCases/dtos/delete.pet.usecase.output';
+import DeletePetUseCaseInput from './useCases/dtos/delete.pet.usecase.input';
 
 @Controller('pet')
 export class PetController {
@@ -21,6 +23,9 @@ export class PetController {
 
     @Inject(PetTokens.updatePetUseCase)
     private readonly updatePetUseCase: IUseCase<UpdatePetUseCaseInput, UpdatePetUseCaseOutput>
+    
+    @Inject(PetTokens.deletePetUseCase)
+    private readonly deletePetUseCase: IUseCase<DeletePetUseCaseInput, DeletePetUseCaseOutPut>
 
     @Post()
     async createPet(@Body() input: CreatePetControllerInput): Promise<CreatePetUseCaseOutput> {
@@ -45,6 +50,16 @@ export class PetController {
         try {
             const useCaseInput = new UpdatePetUseCaseInput({...input, id});
             return await this.updatePetUseCase.run(useCaseInput)
+        } catch (error) {
+            throw new BadRequestException(JSON.parse(error.message));
+        }
+    }
+
+    @Delete(':id')
+    async deletePet(@Param() id:string) : Promise<DeletePetUseCaseOutPut>{
+        try {
+            const useCaseInput = new DeletePetUseCaseInput({id});
+            return await this.deletePetUseCase.run(useCaseInput)
         } catch (error) {
             throw new BadRequestException(JSON.parse(error.message));
         }

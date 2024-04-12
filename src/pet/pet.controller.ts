@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, Inject, Param, Patch, Post, Put, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Inject, Param, Patch, Post, Put, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
 import CreatePetControllerInput from './dtos/create.pet.controller.input';
 import { IUseCase } from 'src/domain/iusecase.interface';
 import CreatePetUseCaseOutput from './useCases/dtos/create.pet.usecase.output';
@@ -15,6 +15,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import multerConfig from 'src/config/multers.config';
 import UpdatePetPhotoUseCaseInput from './useCases/dtos/update.pet.photo.usecase.input';
 import UpdatePetPhotoUseCaseOutput from './useCases/dtos/update.pet.photo.usecase.output';
+import GetPetsUseCaseInput from './useCases/dtos/get.pets.usecase.input';
 
 @Controller('pet')
 export class PetController {
@@ -27,7 +28,7 @@ export class PetController {
 
     @Inject(PetTokens.updatePetUseCase)
     private readonly updatePetUseCase: IUseCase<UpdatePetUseCaseInput, UpdatePetUseCaseOutput>
-    
+
     @Inject(PetTokens.deletePetUseCase)
     private readonly deletePetUseCase: IUseCase<DeletePetUseCaseInput, DeletePetUseCaseOutPut>
 
@@ -42,6 +43,25 @@ export class PetController {
         return await this.createPetUseCase.run(useCaseInput)
     }
 
+    @Get()
+    async getPets(
+        @Query('type') type?: string,
+        @Query('size') size?: string,
+        @Query('gender') gender?: string,
+        @Query('page') page?: string,
+        @Query('itemsPerPage') itemsPerPage?: string,
+    ){
+        const FIRST_PAGE = 1
+        const DEFAULT_ITENS_PER_PAGE = 10
+        const useCaseInput = new GetPetsUseCaseInput({
+            type: !!type ? type : null,
+            size: !!size ? size : null,
+            gender: !!gender ? gender : null,
+            page: !!page ? parseInt(page) : FIRST_PAGE,
+            itemsPerPage : !!itemsPerPage ? parseInt(itemsPerPage) : DEFAULT_ITENS_PER_PAGE
+        })
+    }
+
     @Get(':id')
     async getPetById(@Param('id') id: string): Promise<GetPetByIdUseCaseOutput> {
         try {
@@ -53,9 +73,9 @@ export class PetController {
     }
 
     @Put(':id')
-    async updatePet(@Body() input : UpdatePetControllerInput, @Param() id: string) : Promise<UpdatePetUseCaseOutput>{
+    async updatePet(@Body() input: UpdatePetControllerInput, @Param() id: string): Promise<UpdatePetUseCaseOutput> {
         try {
-            const useCaseInput = new UpdatePetUseCaseInput({...input, id});
+            const useCaseInput = new UpdatePetUseCaseInput({ ...input, id });
             return await this.updatePetUseCase.run(useCaseInput)
         } catch (error) {
             throw new BadRequestException(JSON.parse(error.message));
@@ -63,9 +83,9 @@ export class PetController {
     }
 
     @Delete(':id')
-    async deletePet(@Param() id:string) : Promise<DeletePetUseCaseOutPut>{
+    async deletePet(@Param() id: string): Promise<DeletePetUseCaseOutPut> {
         try {
-            const useCaseInput = new DeletePetUseCaseInput({id});
+            const useCaseInput = new DeletePetUseCaseInput({ id });
             return await this.deletePetUseCase.run(useCaseInput)
         } catch (error) {
             throw new BadRequestException(JSON.parse(error.message));
@@ -73,19 +93,19 @@ export class PetController {
     }
 
     @Patch(':id/photo')
-    @UseInterceptors(FileInterceptor('photo',multerConfig))
-  async  updatePhoto(
+    @UseInterceptors(FileInterceptor('photo', multerConfig))
+    async updatePhoto(
         @UploadedFile() photo: Express.Multer.File,
         @Param('id') id: string
-    ){
+    ) {
         try {
             const useCaseInput = new UpdatePetPhotoUseCaseInput({
                 id,
-                photoPatch : photo.path
+                photoPatch: photo.path
             })
             return await this.updatePetPhotoUseCase.run(useCaseInput)
         } catch (error) {
-            
+            throw new BadRequestException(JSON.parse(error.message));
         }
     }
 }

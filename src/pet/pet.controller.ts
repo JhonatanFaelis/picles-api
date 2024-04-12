@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, Inject, Param, Patch, Post, Put } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Inject, Param, Patch, Post, Put, UploadedFile, UseInterceptors } from '@nestjs/common';
 import CreatePetControllerInput from './dtos/create.pet.controller.input';
 import { IUseCase } from 'src/domain/iusecase.interface';
 import CreatePetUseCaseOutput from './useCases/dtos/create.pet.usecase.output';
@@ -11,6 +11,10 @@ import UpdatePetUseCaseOutput from './useCases/dtos/uptade.pet.usecase.output';
 import UpdatePetUseCaseInput from './useCases/dtos/update.pet.usecase.input';
 import DeletePetUseCaseOutPut from './useCases/dtos/delete.pet.usecase.output';
 import DeletePetUseCaseInput from './useCases/dtos/delete.pet.usecase.input';
+import { FileInterceptor } from '@nestjs/platform-express';
+import multerConfig from 'src/config/multers.config';
+import UpdatePetPhotoUseCaseInput from './useCases/dtos/update.pet.photo.usecase.input';
+import UpdatePetPhotoUseCaseOutput from './useCases/dtos/update.pet.photo.usecase.output';
 
 @Controller('pet')
 export class PetController {
@@ -26,6 +30,9 @@ export class PetController {
     
     @Inject(PetTokens.deletePetUseCase)
     private readonly deletePetUseCase: IUseCase<DeletePetUseCaseInput, DeletePetUseCaseOutPut>
+
+    @Inject(PetTokens.updatePetPhotoUseCase)
+    private readonly updatePetPhotoUseCase: IUseCase<UpdatePetPhotoUseCaseInput, UpdatePetPhotoUseCaseOutput>
 
     @Post()
     async createPet(@Body() input: CreatePetControllerInput): Promise<CreatePetUseCaseOutput> {
@@ -62,6 +69,23 @@ export class PetController {
             return await this.deletePetUseCase.run(useCaseInput)
         } catch (error) {
             throw new BadRequestException(JSON.parse(error.message));
+        }
+    }
+
+    @Patch(':id/photo')
+    @UseInterceptors(FileInterceptor('photo',multerConfig))
+  async  updatePhoto(
+        @UploadedFile() photo: Express.Multer.File,
+        @Param('id') id: string
+    ){
+        try {
+            const useCaseInput = new UpdatePetPhotoUseCaseInput({
+                id,
+                photoPatch : photo.path
+            })
+            return await this.updatePetPhotoUseCase.run(useCaseInput)
+        } catch (error) {
+            
         }
     }
 }

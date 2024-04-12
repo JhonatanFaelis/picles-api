@@ -9,6 +9,10 @@ import { PetModule } from './pet/pet.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    // ServeStaticModule.ForRoot({
+    //   rootPath: join(__dirname,'..', '../public'),
+    //   serveRoot : '/public/',
+    // }),
     ShelterModule,
     MongooseModule.forRootAsync({
       imports :[ConfigModule],
